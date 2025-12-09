@@ -1,0 +1,22 @@
+[project]
+name = "dnamic-toolkit"
+version = "0.1.0"
+description = "Add your description here"
+authors = [
+    { name = "tomhepz", email = "9285131+tomhepz@users.noreply.github.com" }
+]
+requires-python = ">=3.14"
+dependencies = []
+
+[project.scripts]
+your-command = "dnamic_toolkit.cli:main"
+
+
+[build-system]
+requires = ["uv_build>=0.9.11,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
