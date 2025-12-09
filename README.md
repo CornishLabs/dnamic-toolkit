@@ -23,7 +23,7 @@ For having an install, and being able to edit it, see below.
 git clone https://github.com/CornishLabs/dnamic-toolkit.git
 cd dnamic-toolkit
 uv sync # This updates the venv associated with this folder
-````
+```
 
 This creates/updates the project’s `.venv` and installs the project in editable mode in this project venv for development.
 
