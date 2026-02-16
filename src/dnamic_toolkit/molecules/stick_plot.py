@@ -32,12 +32,12 @@ H0 = operators.hyperfine_ham(mol)
 Hz = operators.zeeman_ham(mol)
 Hac1065 = operators.ac_ham(mol, mol.a02[1065], beta=0)
 
-INTEN1065 = np.linspace(0, 17.1 * kWpercm2, 20)
+INTEN1065 = np.linspace(0, 1.89 * kWpercm2, 20)
 
 B=181.699*GAUSS
 
 # Overall Hamiltonian
-Htot = H0 + Hz * B + Hac1065 * INTEN1065
+Htot = H0 + Hz * B + Hac1065 * INTEN1065[:,None,None]
 #%%
 # Solve (diagonalise) Hamiltonians
 eigenenergies, eigenstates = calculate.solve_system(Htot)
@@ -63,8 +63,8 @@ def label_to_indices(labels, N, MF=None):
 #2,7
 #3,8
 
-N_INITIAL = 3
-MF_INITIAL = 8
+N_INITIAL = 2
+MF_INITIAL = 7
 state = int(label_to_indices(eigenlabels,N_INITIAL,MF_INITIAL)[0])
 
 transition_sigma_plus = calculate.transition_electric_moments(
@@ -84,6 +84,7 @@ state_energy = eigenenergies[idx, state] / MHz
 fig,ax = plt.subplots(figsize=(6,3))
 
 print("At B = %.3f G" % (B / GAUSS))
+print(f"At I = {INTEN1065[idx]/kWpercm2:.3f} kW/cm^2")
 print("All transitions from ground state with dipole moment > %.3f d_mol" % (minimum_dipole_moment / mol.d0))
 print("State\tΔE (MHz)\t<mu>\tN\tMF\td (d_mol)")
 for i in range(eigenstates.shape[1]):
@@ -113,8 +114,8 @@ for i in range(eigenstates.shape[1]):
     if transition_sigma_minus[idx, 0, i] > minimum_dipole_moment:
         x_pos = eigenenergies[idx, i] / MHz-state_energy
         y_pos = transition_sigma_minus[idx, 0, i] / mol.d0
-        ax.scatter(x_pos, y_pos, color='green', alpha=0.5)
-        ax.plot([x_pos, x_pos], [0, y_pos], color='green', alpha=0.5, linewidth=1)
+        ax.scatter(x_pos, y_pos, color='red', alpha=0.5)
+        ax.plot([x_pos, x_pos], [0, y_pos], color='red', alpha=0.5, linewidth=1)
     if transition_pi[idx, 0, i] > minimum_dipole_moment:
         x_pos = eigenenergies[idx, i] / MHz-state_energy
         y_pos = transition_pi[idx, 0, i] / mol.d0
@@ -123,10 +124,11 @@ for i in range(eigenstates.shape[1]):
     if transition_sigma_plus[idx, 0, i] > minimum_dipole_moment:
         x_pos = eigenenergies[idx, i] / MHz-state_energy
         y_pos = transition_sigma_plus[idx, 0, i] / mol.d0
-        ax.scatter(x_pos, y_pos, color='red', alpha=0.5)
-        ax.plot([x_pos, x_pos], [0, y_pos], color='red', alpha=0.5, linewidth=1)
+        ax.scatter(x_pos, y_pos, color='green', alpha=0.5)
+        ax.plot([x_pos, x_pos], [0, y_pos], color='green', alpha=0.5, linewidth=1)
 plt.ylim(bottom=0)
 ax.set_xlabel('Energy / h (MHz)')
 ax.set_ylabel('Transition Dipole Moment / $d_{mol}$')
+ax.set_title('Green +, Blue 0, Red -')
 plt.show()
 # %%

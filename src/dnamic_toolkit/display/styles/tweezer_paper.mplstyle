@@ -1,0 +1,75 @@
+# Matplotlib style for scientific plotting
+# This is the base style for "SciencePlots"
+# see: https://github.com/garrettj403/SciencePlots
+
+# Set color cycle: blue, green, yellow, red, violet, gray
+axes.prop_cycle : cycler('color', ['0C5DA5', '00B945', 'FF9500', 'FF2C00', '845B97', '474747', '9e9e9e'])
+
+# Set default figure size
+figure.figsize : 3.5, 3
+
+# Set x axis
+xtick.direction : out
+xtick.major.size : 3
+xtick.major.width : 0.5
+xtick.minor.size : 1.5
+xtick.minor.width : 0.5
+xtick.minor.visible : False
+xtick.top : False
+
+# Set y axis
+ytick.direction : out
+ytick.major.size : 3
+ytick.major.width : 0.5
+ytick.minor.size : 1.5
+ytick.minor.width : 0.5
+ytick.minor.visible : False
+ytick.right : False
+
+# Remove legend frame
+legend.frameon : False
+
+# Use LaTeX for math formatting
+text.usetex : False
+# LaTeX packages
+text.latex.preamble : \usepackage{amsmath} \usepackage{amssymb} \usepackage{sfmath}
+
+# In general, they advocate for all fonts to be panel labels to be sans serif
+# and all font sizes in a figure to be 7 pt and panel labels to be 8 pt bold.
+
+# Use serif fonts
+#font.family : serif
+#font.serif : cmr10, Computer Modern Serif, DejaVu Serif
+#mathtext.fontset : cm
+
+# Font Family
+#font.family: sans-serif
+#font.sans-serif: Nimbus Sans L, DejaVu Sans, Arial, Helvetica, Lucida Grande, Verdana, Geneva, Lucid, Avant Garde, sans-serif
+#mathtext.fontset : dejavusans
+
+# Always use (bundled) DejaVu Sans for consistency
+font.family      : DejaVu Sans          # ← normal text
+font.sans-serif  : DejaVu Sans
+mathtext.fontset : dejavusans           # ← mathtext engine
+
+axes.formatter.use_mathtext : True
+svg.fonttype : none
+
+# Font sizes
+axes.labelsize: 8
+xtick.labelsize: 8
+ytick.labelsize: 8
+legend.fontsize: 8
+font.size: 8
+
+# Set line widths
+axes.linewidth : 0.5
+grid.linewidth : 0.5
+lines.linewidth : 1.
+lines.markersize: 3
+#lines.marker: o
+#scatter.marker: o
+
+axes.formatter.useoffset : False
+
+errorbar.capsize : 0
