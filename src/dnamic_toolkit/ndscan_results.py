@@ -1,0 +1,82 @@
+"""Optional helpers for reading ndscan prepared-runtime result files."""
+
+from __future__ import annotations
+
+from collections.abc import Mapping
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import numpy as np
+
+
+@dataclass(frozen=True)
+class LabNdscanRun:
+    """Small lab-facing wrapper around one prepared-runtime snapshot."""
+
+    snapshot: Any
+
+    @classmethod
+    def open(cls, path: str | Path) -> "LabNdscanRun":
+        from ndscan.results.scan_site_reader import read_scan_site_snapshot
+
+        return cls(read_scan_site_snapshot(path))
+
+    def site(self, path: tuple[str, ...] = ()) -> "LabNdscanSite":
+        return LabNdscanSite(self.snapshot.get_site(path))
+
+    def child_sites(self, path: tuple[str, ...] = ()) -> list["LabNdscanSite"]:
+        return [LabNdscanSite(site) for site in self.snapshot.child_sites(path)]
+
+
+@dataclass(frozen=True)
+class LabNdscanSite:
+    """Small lab-facing wrapper around one offline ndscan site."""
+
+    site: Any
+
+    @property
+    def path(self) -> tuple[str, ...]:
+        return self.site.path
+
+    def available_series_paths(self) -> set[str]:
+        return set(self.site.available_series_paths())
+
+    def series(self, path: str, *, dtype: Any | None = None) -> np.ndarray:
+        return self.site.series(path, dtype=dtype)
+
+    def split_array_series(
+        self,
+        path: str,
+        *,
+        axis: int = 0,
+        indices=None,
+        fixed_indices: Mapping[int, int] | None = None,
+    ) -> dict[int, np.ndarray]:
+        from ndscan.results.series import series_slices_along_axis
+
+        return series_slices_along_axis(
+            self.site,
+            path,
+            axis=axis,
+            indices=indices,
+            fixed_indices=fixed_indices,
+        )
+
+    def fixed_parameter_value_by_fqn(self, fqn: str) -> Any:
+        matches = [
+            entry["value"]
+            for entry in self.site.fixed_parameters.values()
+            if isinstance(entry, Mapping)
+            and isinstance(entry.get("param"), Mapping)
+            and entry["param"].get("fqn") == fqn
+        ]
+        if len(matches) != 1:
+            raise KeyError(
+                f"Could not resolve unique fixed parameter {fqn!r} on site "
+                f"{'/'.join(self.path) or '<root>'}"
+            )
+        return matches[0]
+
+    def metadata_blob(self, name: str) -> Any:
+        return self.site.require_metadata_blob(name)
