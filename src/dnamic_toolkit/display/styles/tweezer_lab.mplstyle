@@ -57,11 +57,11 @@ mathtext.fontset : dejavusans
 svg.fonttype : none
 
 # Font sizes
-axes.labelsize: 12
-xtick.labelsize: 12
-ytick.labelsize: 12
-legend.fontsize: 12
-font.size: 12
+axes.labelsize: 8
+xtick.labelsize: 8
+ytick.labelsize: 8
+legend.fontsize: 8
+font.size: 8
 
 # Set line widths
 axes.linewidth : 0.75
@@ -73,4 +73,4 @@ lines.markersize: 7
 
 axes.formatter.useoffset : False
 
-errorbar.capsize : 3
+errorbar.capsize : 0
