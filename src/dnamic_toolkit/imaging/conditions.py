@@ -1,4 +1,9 @@
-"""Boolean ROI occupancy conditions and conditional binomial statistics."""
+"""Boolean ROI occupancy conditions and conditional binomial statistics.
+
+The compact condition language describes image/ROI occupancy. It is evaluated
+separately for each group, so the group index is implicit rather than written
+in the expression.
+"""
 
 from __future__ import annotations
 
@@ -14,6 +19,9 @@ OccupancyByImage = tuple[np.ndarray, ...]
 ClauseTerm = tuple[int, int, int]
 
 
+# Conditions are represented as a small expression tree. Users usually build
+# these through parse_condition_syntax(), but the dataclasses are also useful
+# in tests or generated analysis code.
 @dataclass(frozen=True)
 class Always:
     """Condition that always evaluates to ``True``."""
@@ -37,16 +45,22 @@ class Empty:
 
 @dataclass(frozen=True)
 class Not:
+    """Logical negation of one condition."""
+
     condition: object
 
 
 @dataclass(frozen=True)
 class And:
+    """Logical conjunction of child conditions."""
+
     conditions: tuple[object, ...]
 
 
 @dataclass(frozen=True)
 class Or:
+    """Logical disjunction of child conditions."""
+
     conditions: tuple[object, ...]
 
 
@@ -91,6 +105,13 @@ def condition_from_clauses(
     return disjuncts[0] if len(disjuncts) == 1 else Or(tuple(disjuncts))
 
 
+# Mini-language accepted by parse_condition_syntax():
+#   "1[0]"          image 1, ROI 0 occupied
+#   "1[!0,2]"       image 1, ROI 0 empty and ROI 2 occupied
+#   "0[0] & 1[0]"   logical AND
+#   "0[0] | 1[0]"   logical OR
+#   "!0[0]"         logical NOT
+# Parentheses are allowed. Operator precedence is !, then &, then |.
 _TOKEN_RE = re.compile(
     r"""
     \s*
@@ -135,6 +156,8 @@ def _tokenize_condition_syntax(text: str) -> list[_SyntaxToken]:
 
 
 class _ConditionSyntaxParser:
+    """Tiny recursive-descent parser for the condition mini-language."""
+
     def __init__(self, tokens: list[_SyntaxToken]):
         self._tokens = tokens
         self._index = 0
@@ -201,6 +224,8 @@ class _ConditionSyntaxParser:
 
 
 def _condition_from_atom_text(text: str):
+    """Parse one image block, such as ``"1[0,!2]"``."""
+
     match = _ATOM_RE.fullmatch(text.strip())
     if match is None:
         raise ValueError(f"Invalid ROI image block {text!r}")
@@ -233,7 +258,8 @@ def parse_condition_syntax(text: str):
     """Parse a compact boolean condition expression.
 
     Example: ``"1[0,1] & 2[!3]"`` means image 1 ROIs 0 and 1 are occupied,
-    and image 2 ROI 3 is empty.
+    and image 2 ROI 3 is empty. The expression is evaluated once per group;
+    it does not select a group itself.
     """
 
     stripped = text.strip()
@@ -244,7 +270,13 @@ def parse_condition_syntax(text: str):
 
 @dataclass(frozen=True)
 class ConditionalBinomialResult:
-    """Conditional probability estimates pooled and per group."""
+    """Conditional probability estimates pooled and per group.
+
+    The per-group arrays keep spatial groups separate. The pooled fields sum
+    raw successes and selected shots across groups before computing the
+    probability and Jeffreys errors. That treats groups like extra multiplexed
+    trials, which is different from averaging already-computed probabilities.
+    """
 
     num_selected_by_group: np.ndarray
     num_successes_by_group: np.ndarray
@@ -261,6 +293,8 @@ class ConditionalBinomialResult:
 def _normalise_occupancy_by_image(
     occupancy: np.ndarray | list[np.ndarray] | tuple[np.ndarray, ...],
 ) -> OccupancyByImage:
+    # Internally use one array per image, each shaped (shots, groups, rois).
+    # This makes "evaluate the same condition for each group" explicit.
     if isinstance(occupancy, np.ndarray):
         occupancy_array = np.asarray(occupancy, dtype=bool)
         if occupancy_array.ndim != 4:
@@ -291,6 +325,7 @@ def _evaluate_condition_for_group(
     condition: Any,
     group_index: int,
 ) -> np.ndarray:
+    # Each branch returns a boolean mask over shots for one group.
     if isinstance(condition, Always):
         return np.ones(occupancy_by_image[0].shape[0], dtype=bool)
     if isinstance(condition, Occupied):
@@ -342,7 +377,12 @@ def conditional_binomial(
     event,
     given=None,
 ) -> ConditionalBinomialResult:
-    """Return conditional binomial statistics pooled and by group."""
+    """Return conditional binomial statistics pooled and by group.
+
+    ``given`` selects the shots included in the denominator. ``event`` selects
+    successes among those shots. Both conditions are evaluated independently
+    for every group.
+    """
 
     occupancy_by_image = _normalise_occupancy_by_image(occupancy)
     given_condition = Always() if given is None else given
