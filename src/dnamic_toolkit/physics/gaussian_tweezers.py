@@ -9,6 +9,11 @@ from its centre.
 All function arguments use explicit SI units.  Keeping unit conversions at the
 call site makes these short formulae much harder to use accidentally with, for
 example, milliwatts in place of watts.
+
+Example use:
+
+trap = gaussian_tweezer_properties(power_w=7.07e-3, wavelength_m=1066e-9, waist_x_m=1.05e-6, waist_y_m=1.16e-6, axial_waist_m=1.19e-6, polarizability_au=1168, mass_amu=133)
+print(trap.radial_x_frequency_hz/1e3, trap.radial_y_frequency_hz/1e3, "kHz")
 """
 
 from dataclasses import dataclass
