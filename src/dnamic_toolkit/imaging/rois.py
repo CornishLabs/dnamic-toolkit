@@ -22,8 +22,11 @@ def normalise_rois(rois: Sequence[Sequence[Sequence[int]]]) -> RoiGroups:
     for group in rois:
         normalised_rois = []
         for bounds in group:
+            # Defensive check: fail close to a malformed ROI definition,
+            # before later code tries to unpack or slice with it.
             if len(bounds) != 4:
                 raise ValueError("Each ROI must have four bounds: (y0, y1, x0, x1)")
+            # Business logic: store every ROI in one canonical tuple shape.
             y0, y1, x0, x1 = (int(value) for value in bounds)
             normalised_rois.append((y0, y1, x0, x1))
         normalised_groups.append(tuple(normalised_rois))
@@ -39,6 +42,9 @@ def validate_rois(
     """Validate and normalise one grouped ROI layout."""
 
     normalised = normalise_rois(rois)
+
+    # Defensive checks: these produce ROI-shaped error messages before NumPy
+    # slicing or broadcasting would fail in a less obvious place.
     if not normalised:
         raise ValueError("At least one ROI group is required")
 
@@ -74,6 +80,7 @@ def sum_counts_in_rois(
     """Return integrated counts with shape ``(group, roi)`` for one image."""
 
     image_array = np.asarray(image)
+    # Defensive boundary: this helper is only for one 2D fluorescence image.
     if image_array.ndim != 2:
         raise ValueError("image must be a 2D array")
 
@@ -81,6 +88,7 @@ def sum_counts_in_rois(
     counts = np.empty((len(normalised), len(normalised[0])), dtype=dtype)
     dtype_info = np.iinfo(counts.dtype) if np.issubdtype(counts.dtype, np.integer) else None
 
+    # Business logic: integrate each rectangular ROI into a (group, roi) array.
     for group_index, group in enumerate(normalised):
         for roi_index, (y0, y1, x0, x1) in enumerate(group):
             value = int(np.sum(image_array[y0:y1, x0:x1]))
@@ -109,6 +117,9 @@ def counts_to_occupancy_stack(
     """
 
     arrays = [np.asarray(counts) for counts in counts_by_image]
+
+    # Defensive checks: keep the downstream condition language on one simple
+    # axis convention, (shots, group, roi), for every image.
     if not arrays:
         raise ValueError("At least one image counts array is required")
     if any(array.ndim != 3 for array in arrays):
@@ -122,10 +133,12 @@ def counts_to_occupancy_stack(
                 "All image counts arrays must share the same number of shots and groups"
             )
 
+    # Business logic: threshold each image stack into boolean occupancy.
     if isinstance(threshold, list | tuple) and len(threshold) == len(arrays):
+        # Threshold set per image
         return tuple(
             threshold_counts_to_occupancy(array, threshold[index])
             for index, array in enumerate(arrays)
         )
-
+    # Same threshold applied to every image
     return tuple(threshold_counts_to_occupancy(array, threshold) for array in arrays)
