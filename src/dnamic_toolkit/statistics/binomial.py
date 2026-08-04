@@ -1,4 +1,4 @@
-"""Binomial statistics helpers shared by online and offline image analysis."""
+"""Binomial probability and interval helpers."""
 
 from __future__ import annotations
 
@@ -9,6 +9,13 @@ import numpy as np
 from scipy.special import betaincinv
 
 DEFAULT_JEFFREYS_LEVEL = 0.6827
+
+__all__ = [
+    "DEFAULT_JEFFREYS_LEVEL",
+    "aggregate_binomial_chunk_statistics",
+    "jeffreys_probability_errors",
+    "jeffreys_probability_interval",
+]
 
 
 def jeffreys_probability_interval(

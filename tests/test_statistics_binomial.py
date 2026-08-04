@@ -1,6 +1,8 @@
+"""Tests for generic binomial statistics helpers."""
+
 import numpy as np
 
-from dnamic_toolkit.imaging.binomial import (
+from dnamic_toolkit.statistics.binomial import (
     aggregate_binomial_chunk_statistics,
     jeffreys_probability_errors,
     jeffreys_probability_interval,

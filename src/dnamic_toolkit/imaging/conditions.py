@@ -13,7 +13,7 @@ from typing import Any
 
 import numpy as np
 
-from dnamic_toolkit.imaging.binomial import jeffreys_probability_errors
+from dnamic_toolkit.statistics.binomial import jeffreys_probability_errors
 
 OccupancyByImage = tuple[np.ndarray, ...]
 ClauseTerm = tuple[int, int, int]
