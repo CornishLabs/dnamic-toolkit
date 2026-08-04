@@ -38,6 +38,42 @@ These are the frequencies from the curvature at the bottom of the trap. Warm
 atoms and quadratic fits over a finite region sample the Gaussian anharmonicity
 and can consequently give somewhat lower frequencies.
 
+## Plotting styles and colours
+
+Use the bundled Matplotlib styles directly:
+
+```python
+import matplotlib.pyplot as plt
+
+plt.style.use("dnamic_toolkit.display.styles.tweezer_lab")
+```
+
+Use named colours or palettes when code needs them explicitly:
+
+```python
+from dnamic_toolkit.display.colors import color, colors, palette_names
+from dnamic_toolkit.display.helpers import errorbar_scatter
+
+print(palette_names())
+print(colors("tol_bright"))
+
+fig, ax = plt.subplots()
+errorbar_scatter(ax, x, y, yerr=yerr, color=color("durham", "purple"))
+```
+
+Format values with uncertainties using the same rounding rule in notebooks,
+scripts, and plot labels:
+
+```python
+from dnamic_toolkit.display.formatting import format_uncertainty
+
+format_uncertainty(0.031, 0.0099)
+# "0.03(1)"
+
+format_uncertainty(0.031, 0.0099, style="latex")
+# "0.03 \\pm 0.01"
+```
+
 ## Installing UV (the modern replacement for conda, pip, virtualenv, piptools,...)
 
 Follow Astral’s install guide: https://docs.astral.sh/uv/getting-started/installation/ 
