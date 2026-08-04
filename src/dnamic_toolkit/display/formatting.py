@@ -28,8 +28,10 @@ def format_uncertainty(
             "notation must be 'auto', 'fixed', or 'scientific'"
         )
 
-    value_decimal = _to_decimal(value, "value")
-    uncertainty_decimal = _to_decimal(uncertainty, "uncertainty")
+    # Convert early so all downstream decisions use Decimal's predictable
+    # base-10 rounding behavior.
+    value_decimal = _to_decimal(value)
+    uncertainty_decimal = _to_decimal(uncertainty)
 
     if uncertainty_decimal <= 0:
         raise ValueError("uncertainty must be positive")
@@ -37,7 +39,8 @@ def format_uncertainty(
     rounded_uncertainty, decimal_place = _round_uncertainty(
         uncertainty_decimal
     )
-    rounded_value = _quantize(value_decimal, decimal_place)
+    # The uncertainty chooses the displayed precision; the value follows it.
+    rounded_value = _round_to_decimal_place(value_decimal, decimal_place)
 
     magnitude = max(abs(rounded_value), rounded_uncertainty)
     use_scientific = (
@@ -60,19 +63,22 @@ def format_uncertainty(
     else:
         scale_exponent = 0
 
+    # Scientific notation is just a shared scale applied to both numbers.
     scale = Decimal(1).scaleb(scale_exponent)
     scaled_place = decimal_place - scale_exponent
 
     value_text = format(
-        _quantize(rounded_value / scale, scaled_place),
+        _round_to_decimal_place(rounded_value / scale, scaled_place),
         "f",
     )
     uncertainty_text = format(
-        _quantize(rounded_uncertainty / scale, scaled_place),
+        _round_to_decimal_place(rounded_uncertainty / scale, scaled_place),
         "f",
     )
 
     if style == "parentheses":
+        # Parentheses style stores only the uncertainty digits that align
+        # with the last displayed decimals in the value.
         digits = uncertainty_text.replace(".", "").lstrip("0") or "0"
         result = f"{value_text}({digits})"
         return (
@@ -91,14 +97,14 @@ def format_uncertainty(
     return f"({result})e{scale_exponent}"
 
 
-def _to_decimal(value: Number, name: str) -> Decimal:
+def _to_decimal(value: Number) -> Decimal:
     try:
         result = Decimal(str(value))
     except (InvalidOperation, ValueError) as error:
-        raise ValueError(f"{name} must be a finite number") from error
+        raise ValueError("number must be finite") from error
 
     if not result.is_finite():
-        raise ValueError(f"{name} must be finite")
+        raise ValueError("number must be finite")
 
     return result
 
@@ -123,33 +129,23 @@ def _round_uncertainty(
         else 1
     )
 
-    # Convert the desired number of significant digits into the decimal
-    # exponent expected by quantize().
+    # Convert the desired number of significant digits into a decimal place.
     # Example: 0.0123 with two significant digits rounds at 1e-3.
     decimal_place = original_exponent - significant_digits + 1
-    rounded = _quantize(uncertainty, decimal_place)
+    rounded = _round_to_decimal_place(uncertainty, decimal_place)
 
     # Rounding may increase the order of magnitude, such as 9.9 -> 10.
     # Recalculate the decimal place so the rounded result still has the
     # intended number of significant digits.
     if rounded.adjusted() > original_exponent:
         decimal_place = rounded.adjusted() - significant_digits + 1
-        rounded = _quantize(uncertainty, decimal_place)
+        rounded = _round_to_decimal_place(uncertainty, decimal_place)
 
     return rounded, decimal_place
 
 
-def _quantize(value: Decimal, exponent: int) -> Decimal:
-    """Round value to exponent place 
-        >>> _quantize(Decimal('8.453'),1)
-        Decimal('1E+1')
-        >>> _quantize(Decimal('8.453'),0) 
-        Decimal('8')
-        >>> _quantize(Decimal('8.453'),-1) 
-        Decimal('8.5')
-        >>> _quantize(Decimal('8.453'),-2)  
-        Decimal('8.45')
-    """
+def _round_to_decimal_place(value: Decimal, exponent: int) -> Decimal:
+    """Round value to a base-10 decimal place."""
     quantum = Decimal(1).scaleb(exponent)
     rounded = value.quantize(quantum, rounding=ROUND_HALF_UP)
     return abs(rounded) if rounded.is_zero() else rounded

@@ -2,6 +2,17 @@
 
 from __future__ import annotations
 
+"""
+Definition of colour schemes for lines and maps that also work for colour-blind
+people. https://sronpersonalpages.nl/~pault/ for background information and
+best usage of the schemes.
+
+Copyright (c) 2022, Paul Tol
+All rights reserved.
+
+License:  Standard 3-clause BSD
+Reference:  https://sronpersonalpages.nl/~pault/
+"""
 
 PALETTES = {
     "durham": {

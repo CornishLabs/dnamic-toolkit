@@ -7,7 +7,7 @@ import colorsys
 from matplotlib import colors as matplotlib_colors
 
 
-__all__ = ["errorbar_scatter"]
+__all__ = ["errorbar_scatter", "adjust_lightness"]
 
 
 _DEFAULT_ERRORBAR_KWARGS = {
@@ -18,7 +18,7 @@ _DEFAULT_ERRORBAR_KWARGS = {
 }
 
 
-def _adjust_lightness(color_like, amount: float = 1.0) -> str:
+def adjust_lightness(color_like, amount: float = 1.0) -> str:
     """Return ``color_like`` with HLS lightness scaled by ``amount``.
 
     ``amount=1`` leaves the color unchanged; values below one darken it and
@@ -59,8 +59,8 @@ def errorbar_scatter(
 
     errorbar_kwargs = {**_DEFAULT_ERRORBAR_KWARGS, **kwargs}
     if color is not None:
-        edge_color = _adjust_lightness(color, outline_lightness)
-        face_color = "none" if hollow else _adjust_lightness(color, face_lightness)
+        edge_color = adjust_lightness(color, outline_lightness)
+        face_color = "none" if hollow else adjust_lightness(color, face_lightness)
         errorbar_kwargs.setdefault("color", face_color)
         errorbar_kwargs.setdefault("markerfacecolor", face_color)
         errorbar_kwargs.setdefault("markeredgecolor", edge_color)
