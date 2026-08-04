@@ -8,7 +8,7 @@ from typing import Any
 
 import numpy as np
 
-from dnamic_toolkit.imaging.binomial import estimate_probability_from_counts
+from dnamic_toolkit.imaging.binomial import jeffreys_probability_errors
 
 OccupancyByImage = tuple[np.ndarray, ...]
 ClauseTerm = tuple[int, int, int]
@@ -249,11 +249,13 @@ class ConditionalBinomialResult:
     num_selected_by_group: np.ndarray
     num_successes_by_group: np.ndarray
     probability_by_group: np.ndarray
-    probability_error_by_group: np.ndarray
+    probability_error_low_by_group: np.ndarray
+    probability_error_high_by_group: np.ndarray
     pooled_num_selected: int
     pooled_num_successes: int
     pooled_probability: float
-    pooled_probability_error: float
+    pooled_probability_error_low: float
+    pooled_probability_error_high: float
 
 
 def _normalise_occupancy_by_image(
@@ -349,7 +351,8 @@ def conditional_binomial(
     num_selected_by_group = np.empty(num_groups, dtype=int)
     num_successes_by_group = np.empty(num_groups, dtype=int)
     probability_by_group = np.empty(num_groups, dtype=float)
-    probability_error_by_group = np.empty(num_groups, dtype=float)
+    probability_error_low_by_group = np.empty(num_groups, dtype=float)
+    probability_error_high_by_group = np.empty(num_groups, dtype=float)
 
     for group_index in range(num_groups):
         selected = _evaluate_condition_for_group(
@@ -364,7 +367,7 @@ def conditional_binomial(
         )
         num_selected = int(np.sum(selected))
         num_successes = int(np.sum(successes))
-        probability, probability_error = estimate_probability_from_counts(
+        probability, lower_error, upper_error = jeffreys_probability_errors(
             num_successes,
             num_selected,
         )
@@ -372,11 +375,16 @@ def conditional_binomial(
         num_selected_by_group[group_index] = num_selected
         num_successes_by_group[group_index] = num_successes
         probability_by_group[group_index] = probability
-        probability_error_by_group[group_index] = probability_error
+        probability_error_low_by_group[group_index] = lower_error
+        probability_error_high_by_group[group_index] = upper_error
 
     pooled_num_selected = int(np.sum(num_selected_by_group))
     pooled_num_successes = int(np.sum(num_successes_by_group))
-    pooled_probability, pooled_probability_error = estimate_probability_from_counts(
+    (
+        pooled_probability,
+        pooled_probability_error_low,
+        pooled_probability_error_high,
+    ) = jeffreys_probability_errors(
         pooled_num_successes,
         pooled_num_selected,
     )
@@ -385,9 +393,11 @@ def conditional_binomial(
         num_selected_by_group=num_selected_by_group,
         num_successes_by_group=num_successes_by_group,
         probability_by_group=probability_by_group,
-        probability_error_by_group=probability_error_by_group,
+        probability_error_low_by_group=probability_error_low_by_group,
+        probability_error_high_by_group=probability_error_high_by_group,
         pooled_num_selected=pooled_num_selected,
         pooled_num_successes=pooled_num_successes,
         pooled_probability=pooled_probability,
-        pooled_probability_error=pooled_probability_error,
+        pooled_probability_error_low=pooled_probability_error_low,
+        pooled_probability_error_high=pooled_probability_error_high,
     )

@@ -1,10 +1,10 @@
 """Image analysis helpers for tweezer and MOT fluorescence data."""
 
 from dnamic_toolkit.imaging.binomial import (
+    DEFAULT_JEFFREYS_LEVEL,
     aggregate_binomial_chunk_statistics,
-    estimate_probability_array,
-    estimate_probability_from_counts,
-    jeffreys_median_ci,
+    jeffreys_probability_errors,
+    jeffreys_probability_interval,
 )
 from dnamic_toolkit.imaging.conditions import (
     Always,
@@ -44,6 +44,7 @@ __all__ = [
     "Always",
     "And",
     "ConditionalBinomialResult",
+    "DEFAULT_JEFFREYS_LEVEL",
     "Empty",
     "ImageReadoutSpec",
     "Not",
@@ -58,9 +59,8 @@ __all__ = [
     "condition_from_clauses",
     "conditional_binomial",
     "counts_to_occupancy_stack",
-    "estimate_probability_array",
-    "estimate_probability_from_counts",
-    "jeffreys_median_ci",
+    "jeffreys_probability_errors",
+    "jeffreys_probability_interval",
     "normalise_rois",
     "parse_condition_syntax",
     "rois_from_jsonable",

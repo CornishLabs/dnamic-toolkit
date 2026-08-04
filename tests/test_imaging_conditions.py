@@ -39,5 +39,7 @@ def test_conditional_binomial_from_occupancy_stack():
     np.testing.assert_array_equal(result.num_selected_by_group, [3, 3])
     np.testing.assert_array_equal(result.num_successes_by_group, [2, 0])
     np.testing.assert_allclose(result.probability_by_group, [2 / 3, 0.0])
+    assert result.probability_error_low_by_group[1] == 0.0
+    assert result.probability_error_high_by_group[1] > 0.0
     assert result.pooled_num_selected == 6
     assert result.pooled_num_successes == 2

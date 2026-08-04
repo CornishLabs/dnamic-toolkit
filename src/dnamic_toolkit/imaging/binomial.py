@@ -2,94 +2,115 @@
 
 from __future__ import annotations
 
-import math
 from collections import defaultdict
 from collections.abc import Sequence
 
 import numpy as np
 from scipy.special import betaincinv
 
-
-def estimate_probability_from_counts(
-    num_successes: float,
-    num_shots: int,
-) -> tuple[float, float]:
-    """Return a binomial probability estimate and conservative standard error."""
-
-    if num_shots < 0:
-        raise ValueError("num_shots must be non-negative")
-    if num_shots == 0:
-        return 0.0, float("inf")
-
-    probability = float(num_successes) / float(num_shots)
-    if probability < 0.0 or probability > 1.0:
-        raise ValueError("num_successes must lie between 0 and num_shots")
-
-    error = math.sqrt(max(probability * (1.0 - probability), 0.0) / num_shots)
-    error = max(error, 0.5 / num_shots)
-    return probability, error
+DEFAULT_JEFFREYS_LEVEL = 0.6827
 
 
-def estimate_probability_array(
-    num_successes: np.ndarray,
-    num_shots: int,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Vectorised version of :func:`estimate_probability_from_counts`."""
-
-    successes = np.asarray(num_successes, dtype=float)
-    if num_shots < 0:
-        raise ValueError("num_shots must be non-negative")
-    if num_shots == 0:
-        return (
-            np.zeros(successes.shape, dtype=float),
-            np.full(successes.shape, float("inf"), dtype=float),
-        )
-
-    probability = successes / float(num_shots)
-    if np.any(probability < 0.0) or np.any(probability > 1.0):
-        raise ValueError("num_successes must lie between 0 and num_shots")
-
-    error = np.sqrt(np.maximum(probability * (1.0 - probability), 0.0) / num_shots)
-    error = np.maximum(error, 0.5 / num_shots)
-    return probability, error
-
-
-def jeffreys_median_ci(
+def jeffreys_probability_interval(
     num_successes,
     num_shots,
     *,
-    level: float = 0.6827,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Return Jeffreys posterior median and equal-tailed credible interval.
+    level: float = DEFAULT_JEFFREYS_LEVEL,
+) -> tuple[np.ndarray | float, np.ndarray | float, np.ndarray | float]:
+    """Return observed probability and modified Jeffreys interval bounds.
 
-    This is useful for sparse loading data where normal error bars behave badly
-    near probabilities of 0 or 1.
+    The plotted estimate is the observed fraction ``k / n``. The interval is
+    the equal-tailed Jeffreys posterior interval, with endpoints clipped to
+    0 or 1 when all observations are failures or successes. Zero-shot inputs
+    return NaN because there is no observed proportion to plot.
     """
 
+    successes, shots = _validate_binomial_counts(num_successes, num_shots)
+    if not 0.0 < level < 1.0:
+        raise ValueError("level must lie between 0 and 1")
+
+    probability = np.full(successes.shape, np.nan, dtype=float)
+    low = np.full(successes.shape, np.nan, dtype=float)
+    high = np.full(successes.shape, np.nan, dtype=float)
+
+    has_shots = shots > 0
+    probability[has_shots] = successes[has_shots] / shots[has_shots]
+
+    posterior_alpha = successes[has_shots] + 0.5
+    posterior_beta = shots[has_shots] - successes[has_shots] + 0.5
+    tail = 0.5 * (1.0 - float(level))
+    low[has_shots] = betaincinv(posterior_alpha, posterior_beta, tail)
+    high[has_shots] = betaincinv(
+        posterior_alpha,
+        posterior_beta,
+        1.0 - tail,
+    )
+
+    # Modified Jeffreys intervals include the observed boundary exactly.
+    low[has_shots & (successes == 0)] = 0.0
+    high[has_shots & (successes == shots)] = 1.0
+
+    return (
+        _as_scalar_if_scalar(probability),
+        _as_scalar_if_scalar(low),
+        _as_scalar_if_scalar(high),
+    )
+
+
+def jeffreys_probability_errors(
+    num_successes,
+    num_shots,
+    *,
+    level: float = DEFAULT_JEFFREYS_LEVEL,
+) -> tuple[np.ndarray | float, np.ndarray | float, np.ndarray | float]:
+    """Return probability and asymmetric error-bar lengths for plotting."""
+
+    probability, low, high = jeffreys_probability_interval(
+        num_successes,
+        num_shots,
+        level=level,
+    )
+    return probability, probability - low, high - probability
+
+
+def _as_scalar_if_scalar(value: np.ndarray) -> np.ndarray | float:
+    if value.shape == ():
+        return float(value)
+    return value
+
+
+def _validate_binomial_counts(
+    num_successes,
+    num_shots,
+) -> tuple[np.ndarray, np.ndarray]:
     successes = np.asarray(num_successes, dtype=float)
     shots = np.asarray(num_shots, dtype=float)
+    try:
+        successes, shots = np.broadcast_arrays(successes, shots)
+    except ValueError as error:
+        raise ValueError(
+            "num_successes and num_shots must be broadcastable"
+        ) from error
+
+    if np.any(~np.isfinite(successes)) or np.any(~np.isfinite(shots)):
+        raise ValueError("num_successes and num_shots must be finite")
     if np.any(shots < 0):
         raise ValueError("num_shots must be non-negative")
     if np.any(successes < 0) or np.any(successes > shots):
         raise ValueError("num_successes must lie between 0 and num_shots")
-    if not 0.0 < level < 1.0:
-        raise ValueError("level must lie between 0 and 1")
 
-    alpha = successes + 0.5
-    beta = shots - successes + 0.5
-    tail = 0.5 * (1.0 - float(level))
-    median = betaincinv(alpha, beta, 0.5)
-    low = betaincinv(alpha, beta, tail)
-    high = betaincinv(alpha, beta, 1.0 - tail)
-    return median, low, high
+    return successes, shots
 
 
 def aggregate_binomial_chunk_statistics(
     x_values: Sequence[float],
     num_successes: Sequence[float | int],
     num_shots: Sequence[int],
-) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
-    """Collapse repeated chunk-level statistics into one estimate per x value."""
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Collapse chunk statistics into probability and Jeffreys errors by x.
+
+    Returns ``x, probability, lower_error, upper_error, total_shots``.
+    """
 
     successes_by_x = defaultdict(float)
     shots_by_x = defaultdict(int)
@@ -106,18 +127,24 @@ def aggregate_binomial_chunk_statistics(
         shots_by_x[key] += int(shots_chunk)
 
     unique_x = np.asarray(sorted(shots_by_x), dtype=float)
-    probabilities = np.empty(len(unique_x), dtype=float)
-    probability_errors = np.empty(len(unique_x), dtype=float)
-    total_shots = np.empty(len(unique_x), dtype=int)
+    total_successes = np.asarray(
+        [successes_by_x[float(x_value)] for x_value in unique_x],
+        dtype=float,
+    )
+    total_shots = np.asarray(
+        [shots_by_x[float(x_value)] for x_value in unique_x],
+        dtype=int,
+    )
+    (
+        probabilities,
+        probability_error_low,
+        probability_error_high,
+    ) = jeffreys_probability_errors(total_successes, total_shots)
 
-    for index, x_value in enumerate(unique_x):
-        total = shots_by_x[float(x_value)]
-        probability, probability_error = estimate_probability_from_counts(
-            successes_by_x[float(x_value)],
-            total,
-        )
-        probabilities[index] = probability
-        probability_errors[index] = probability_error
-        total_shots[index] = total
-
-    return unique_x, probabilities, probability_errors, total_shots
+    return (
+        unique_x,
+        probabilities,
+        probability_error_low,
+        probability_error_high,
+        total_shots,
+    )
