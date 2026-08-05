@@ -1,7 +1,7 @@
 import h5py
 import json
 
-from typing import Any, Dict, List, NamedTuple, Optional, Tuple, Union
+from typing import Any, Dict
 
 def load_hdf5_file(filename: str) -> Dict[str, Any]:
     """Load an ARTIQ results file. (copy of oitg func)
