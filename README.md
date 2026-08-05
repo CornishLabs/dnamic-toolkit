@@ -7,15 +7,11 @@ The lightweight analytical model can turn per-tweezer optical power and measured
 waists into centre intensity, trap depth, and local harmonic trap frequencies:
 
 ```python
-from dnamic_toolkit.calibrations.cs_1066_power import (
-    cs_1066_test_point_power_w,
-)
-from dnamic_toolkit.physics.gaussian_tweezers import (
-    gaussian_tweezer_properties,
-)
+from dnamic_toolkit.physics.gaussian_tweezers import gaussian_tweezer_properties
 
-test_point_power_w = cs_1066_test_point_power_w(5.65)
-power_per_tweezer_w = test_point_power_w * 0.43 / 9
+# Apparatus-specific calibration records live in the experiment repository. Use
+# the calibrated optical power from that lab record as the input here.
+power_per_tweezer_w = 0.14767824386100453 * 0.43 / 9
 
 trap = gaussian_tweezer_properties(
     power_w=power_per_tweezer_w,
