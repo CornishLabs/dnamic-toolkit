@@ -34,6 +34,39 @@ These are the frequencies from the curvature at the bottom of the trap. Warm
 atoms and quadratic fits over a finite region sample the Gaussian anharmonicity
 and can consequently give somewhat lower frequencies.
 
+## Alkali polarizabilities
+
+Rb/Cs dynamic polarizabilities can be calculated with ARC, or loaded from portal
+CSV exports that contain `alpha_0`, `alpha_2`, and their uncertainties:
+
+```python
+import numpy as np
+
+from dnamic_toolkit.physics.alkali_polarizability import (
+    AlkaliState,
+    arc_polarizability,
+    dynamic_polarizability_from_components,
+    interpolate_portal_polarizability,
+    load_portal_polarizability_folder,
+    portal_table,
+)
+
+state = AlkaliState.from_label("Rb", "5p3/2")
+wavelength_nm = np.linspace(600, 1200, 50)
+
+portal_tables = load_portal_polarizability_folder("~/Downloads/Rb1Pol/Rb1Pol")
+portal_components = interpolate_portal_polarizability(
+    portal_table(portal_tables, "Rb", "5p3"),
+    wavelength_nm,
+)
+portal_alpha = dynamic_polarizability_from_components(portal_components)
+
+arc_components = arc_polarizability(state, wavelength_nm, n_max=30)
+arc_alpha = dynamic_polarizability_from_components(arc_components)
+```
+
+See `examples/alkali_polarizability.py` for an Rb/Cs plotting example.
+
 ## Plotting styles and colours
 
 Use the bundled Matplotlib styles directly:

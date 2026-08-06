@@ -3,6 +3,45 @@ revision = 3
 requires-python = ">=3.13"
 
 [[package]]
+name = "arc-alkali-rydberg-calculator"
+version = "3.10.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asteval" },
+    { name = "h5py" },
+    { name = "lmfit" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "rich" },
+    { name = "scipy" },
+    { name = "sympy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/be/dc/17c059c28adf39f83f6fe90855f38c4c687edb937f4b7775dc8dda99b06a/arc_alkali_rydberg_calculator-3.10.2.tar.gz", hash = "sha256:30165a50a48cb0daacfe9c75275d378ef193653c2e80d84aca5bd4870f519168", size = 22872946, upload-time = "2026-01-21T21:24:19.667Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/78/d1/3b2ec0213c51c0d2ec203f64afcb562247b14fe04a1ffef0b7f9b2596356/arc_alkali_rydberg_calculator-3.10.2-cp313-cp313-macosx_11_0_arm64.whl", hash = "sha256:84d98434e6ed2b7f624a6f324fd4c99fff5a64f4095a4a0cfc4f12328b722cba", size = 23723478, upload-time = "2026-01-21T21:23:47.144Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/69/570fcdd13865fc8fcc84f76f5c79169eb3bad21f37f0b90ebfe9a96e8512/arc_alkali_rydberg_calculator-3.10.2-cp313-cp313-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:f233c861eb9ab83cf6c975df26862546623e6d1327a1dbaa4f1b6bc5c39b3006", size = 23745119, upload-time = "2026-01-21T21:23:50.457Z" },
+    { url = "https://files.pythonhosted.org/packages/92/8b/c4769bb266166050e36eaa614be594660a1fc1cb57301c1f15d609058d08/arc_alkali_rydberg_calculator-3.10.2-cp313-cp313-musllinux_1_2_x86_64.whl", hash = "sha256:bdcecb6055a13d63dbe19181dc059a0a685a03cafae9329b2a44ce013bfb4932", size = 23745410, upload-time = "2026-01-21T21:23:53.398Z" },
+    { url = "https://files.pythonhosted.org/packages/47/38/2a0de6291e15bc89c8e365ba2d0919c5ab753c0949a06183a55492d340ec/arc_alkali_rydberg_calculator-3.10.2-cp313-cp313-win_amd64.whl", hash = "sha256:c679e464af43b48d9677dfa615acc32e156177582d4e23ca2c09f2b57253edf0", size = 23725842, upload-time = "2026-01-21T21:23:55.713Z" },
+    { url = "https://files.pythonhosted.org/packages/1d/4c/12fe7c4adae36f6c6d9b079d9e7d820e9f28bee842237b888e0952722fe2/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314-macosx_11_0_arm64.whl", hash = "sha256:b09a99dd75cf85da726b722556dfba1f5e93f12a4c96ffe9a44c1cbbd1d38127", size = 23723482, upload-time = "2026-01-21T21:23:58.244Z" },
+    { url = "https://files.pythonhosted.org/packages/9f/e5/1ada95d84542a2b07c0d87df651b559662778e95c7fe766662f1079e91ab/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:170eedcef40cca7a609070066d2068a30c619198793fba9289bb0d808fb922e6", size = 23745170, upload-time = "2026-01-21T21:24:00.564Z" },
+    { url = "https://files.pythonhosted.org/packages/f1/1d/a87645e9d5b1acd0cd194d17c781c98f5969ff5856d45abbfac5f9408275/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314-musllinux_1_2_x86_64.whl", hash = "sha256:293e3f05240749bd2e9640a11ff9a252d90697a3e910de0330a5d1a45f65a62b", size = 23745461, upload-time = "2026-01-21T21:24:03.299Z" },
+    { url = "https://files.pythonhosted.org/packages/bf/0d/b1285093da19b91a0ae1c75e37c0921ed9f68afc953de962a27e79c7b489/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314-win_amd64.whl", hash = "sha256:a04a26ba14cb16fb4c85aa5931af0be65e303aa02011a335dab7952fcd545a58", size = 23423464, upload-time = "2026-01-21T21:24:05.806Z" },
+    { url = "https://files.pythonhosted.org/packages/80/f2/88af73371fa5e5d8a109d43a2c8781cdaa3a7d558bb78f0edc4d55030433/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314t-macosx_11_0_arm64.whl", hash = "sha256:fa86621e957b1d23379b8f7a36a3ae9a4e6d49b6b50fc2f38787069608e489e8", size = 23723566, upload-time = "2026-01-21T21:24:08.848Z" },
+    { url = "https://files.pythonhosted.org/packages/15/dc/b8442b398afe0cbe3d500aa3e1aad49a44a6786433be1eb9ba7007f3f49c/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314t-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:d0a408b8fd4622f8a92ac0ed1dfb55eb9dbae7bb219a786b33d387cad94417fe", size = 23745942, upload-time = "2026-01-21T21:24:11.336Z" },
+    { url = "https://files.pythonhosted.org/packages/8f/16/6def3aabdc31ad74dca7f2753c5aa597389120106252d3c85a3c72dc1a5b/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:f3902d4fad65d248c9d85c00c51e1c70f11ec7c50d80ff19e92ac0a27fdbe37d", size = 23746213, upload-time = "2026-01-21T21:24:14.27Z" },
+    { url = "https://files.pythonhosted.org/packages/0f/0a/0d280365413ffe38b0af4b1da791efc35c28089440284ffdf6177db93897/arc_alkali_rydberg_calculator-3.10.2-cp314-cp314t-win_amd64.whl", hash = "sha256:6f18ce50ccd92edf0aba84be9c37ddbd34ddfb6ffb934b579894b0799a110f76", size = 23423598, upload-time = "2026-01-21T21:24:16.754Z" },
+]
+
+[[package]]
+name = "asteval"
+version = "1.0.9"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/b1/71/bec6758ab41ada3b6870cb194ea16d2e76bb530562c8a8cd7d2167012bea/asteval-1.0.9.tar.gz", hash = "sha256:4f7323d63d9fbf89d7e1d5f8bb59b6c093970c15bb5926e6e67d0195858aa230", size = 55237, upload-time = "2026-06-11T18:40:36.086Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fe/d7/a71b12b625c44cfcb95d41397752edccc0a731903081609cffd6720f671d/asteval-1.0.9-py3-none-any.whl", hash = "sha256:60513ea5d608d27bdb0cf3785dc993a6c3adeaee45f1bded0953a09e904e461f", size = 23320, upload-time = "2026-06-11T18:40:35.068Z" },
+]
+
+[[package]]
 name = "colorama"
 version = "0.4.6"
 source = { registry = "https://pypi.org/simple" }
@@ -90,10 +129,20 @@ wheels = [
 ]
 
 [[package]]
+name = "dill"
+version = "0.4.1"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/81/e1/56027a71e31b02ddc53c7d65b01e68edf64dea2932122fe7746a516f75d5/dill-0.4.1.tar.gz", hash = "sha256:423092df4182177d4d8ba8290c8a5b640c66ab35ec7da59ccfa00f6fa3eea5fa", size = 187315, upload-time = "2026-01-19T02:36:56.85Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/77/dc8c558f7593132cf8fefec57c4f60c83b16941c574ac5f619abb3ae7933/dill-0.4.1-py3-none-any.whl", hash = "sha256:1e1ce33e978ae97fcfcff5638477032b801c46c7c65cf717f95fbc2248f79a9d", size = 120019, upload-time = "2026-01-19T02:36:55.663Z" },
+]
+
+[[package]]
 name = "dnamic-toolkit"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "arc-alkali-rydberg-calculator" },
     { name = "diatomic-py" },
     { name = "h5py" },
     { name = "matplotlib" },
@@ -109,6 +158,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
+    { name = "arc-alkali-rydberg-calculator", specifier = ">=3.10.2" },
     { name = "diatomic-py", specifier = ">=2.1.0" },
     { name = "h5py", specifier = ">=3.15.1" },
     { name = "matplotlib", specifier = ">=3.10.7" },
@@ -267,6 +317,34 @@ wheels = [
 ]
 
 [[package]]
+name = "lmfit"
+version = "1.3.4"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "asteval" },
+    { name = "dill" },
+    { name = "numpy" },
+    { name = "scipy" },
+    { name = "uncertainties" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/5a/e5/a35942aed2de95e228728c34609b51fe3ec9182398eac50d288eef313aa2/lmfit-1.3.4.tar.gz", hash = "sha256:3c22c28c43f717f6c5b4a3bd81e893a2149739c26a592c046f2e33c23cfbe497", size = 630720, upload-time = "2025-07-19T20:09:01.876Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/38/7e/7b91c89a4cf0f543a83be978657afb20c86af6d725253e319589dcc4ce52/lmfit-1.3.4-py3-none-any.whl", hash = "sha256:afce1593b42324d37ae2908249b0c55445e2f4c1a0474ff706a8e2f7b5d949fa", size = 97662, upload-time = "2025-07-19T20:09:00.32Z" },
+]
+
+[[package]]
+name = "markdown-it-py"
+version = "4.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "mdurl" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/06/ff/7841249c247aa650a76b9ee4bbaeae59370dc8bfd2f6c01f3630c35eb134/markdown_it_py-4.2.0.tar.gz", hash = "sha256:04a21681d6fbb623de53f6f364d352309d4094dd4194040a10fd51833e418d49", size = 82454, upload-time = "2026-05-07T12:08:28.36Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/81/4da04ced5a082363ecfa159c010d200ecbd959ae410c10c0264a38cac0f5/markdown_it_py-4.2.0-py3-none-any.whl", hash = "sha256:9f7ebbcd14fe59494226453aed97c1070d83f8d24b6fc3a3bcf9a38092641c4a", size = 91687, upload-time = "2026-05-07T12:08:27.182Z" },
+]
+
+[[package]]
 name = "matplotlib"
 version = "3.11.1"
 source = { registry = "https://pypi.org/simple" }
@@ -311,6 +389,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/0f/68/3c22e9320bdce2c4d2f1320643ef706db7a24cb7420eea28b97a2d67f5a8/matplotlib-3.11.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:b937b9dba5f5f6c1e31c47abe2186c865c0914fd18f2ce0dfc39c9adcef5951d", size = 10943061, upload-time = "2026-07-18T03:39:32.356Z" },
     { url = "https://files.pythonhosted.org/packages/f6/4a/907ed190ee81a9df581e0ed5456134fc0f7cb55ffcfda2f9e54ca900761c/matplotlib-3.11.1-cp314-cp314t-win_amd64.whl", hash = "sha256:f2912f647f3fbe1ccf085f91e213936f9101bead81a5e670565b1f1b3712f4fb", size = 9540074, upload-time = "2026-07-18T03:39:34.789Z" },
     { url = "https://files.pythonhosted.org/packages/23/d4/97c19b77e0a6e3b48581185bb65088f431cd20186076cc0f650a1757ea46/matplotlib-3.11.1-cp314-cp314t-win_arm64.whl", hash = "sha256:54d47b8ae8b579633a3902ca5b4ad6c1e132a5626d64447b2e22a66394e79987", size = 9213472, upload-time = "2026-07-18T03:39:37.141Z" },
+]
+
+[[package]]
+name = "mdurl"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/54/cfe61301667036ec958cb99bd3efefba235e65cdeb9c84d24a8293ba1d90/mdurl-0.1.2.tar.gz", hash = "sha256:bb413d29f5eea38f31dd4754dd7377d4465116fb207585f97bf925588687c1ba", size = 8729, upload-time = "2022-08-14T12:40:10.846Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b3/38/89ba8ad64ae25be8de66a6d463314cf1eb366222074cfda9ee839c56a4b4/mdurl-0.1.2-py3-none-any.whl", hash = "sha256:84008a41e51615a49fc9966191ff91509e3c40b939176e643fd50a5c2196b8f8", size = 9979, upload-time = "2022-08-14T12:40:09.779Z" },
 ]
 
 [[package]]
@@ -537,6 +624,19 @@ wheels = [
 ]
 
 [[package]]
+name = "rich"
+version = "15.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "markdown-it-py" },
+    { name = "pygments" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/c0/8f/0722ca900cc807c13a6a0c696dacf35430f72e0ec571c4275d2371fca3e9/rich-15.0.0.tar.gz", hash = "sha256:edd07a4824c6b40189fb7ac9bc4c52536e9780fbbfbddf6f1e2502c31b068c36", size = 230680, upload-time = "2026-04-12T08:24:00.75Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/82/3b/64d4899d73f91ba49a8c18a8ff3f0ea8f1c1d75481760df8c68ef5235bf5/rich-15.0.0-py3-none-any.whl", hash = "sha256:33bd4ef74232fb73fe9279a257718407f169c09b78a87ad3d296f548e27de0bb", size = 310654, upload-time = "2026-04-12T08:24:02.83Z" },
+]
+
+[[package]]
 name = "scipy"
 version = "1.16.3"
 source = { registry = "https://pypi.org/simple" }
@@ -606,4 +706,13 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/83/d3/803453b36afefb7c2bb238361cd4ae6125a569b4db67cd9e79846ba2d68c/sympy-1.14.0.tar.gz", hash = "sha256:d3d3fe8df1e5a0b42f0e7bdf50541697dbe7d23746e894990c030e2b05e72517", size = 7793921, upload-time = "2025-04-27T18:05:01.611Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/a2/09/77d55d46fd61b4a135c444fc97158ef34a095e5681d0a6c10b75bf356191/sympy-1.14.0-py3-none-any.whl", hash = "sha256:e091cc3e99d2141a0ba2847328f5479b05d94a6635cb96148ccb3f34671bd8f5", size = 6299353, upload-time = "2025-04-27T18:04:59.103Z" },
+]
+
+[[package]]
+name = "uncertainties"
+version = "3.2.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/fe/0c/cb09f33b26955399c675ab378e4063ed7e48422d3d49f96219ab0be5eba9/uncertainties-3.2.3.tar.gz", hash = "sha256:76a5653e686f617a42922d546a239e9efce72e6b35411b7750a1d12dcba03031", size = 160492, upload-time = "2025-04-21T19:58:28.63Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/5e/f1e1dd319e35e962a4e00b33150a8868b6329cc1d19fd533436ba5488f09/uncertainties-3.2.3-py3-none-any.whl", hash = "sha256:313353900d8f88b283c9bad81e7d2b2d3d4bcc330cbace35403faaed7e78890a", size = 60118, upload-time = "2025-04-21T19:58:26.864Z" },
 ]
