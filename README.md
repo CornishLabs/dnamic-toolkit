@@ -67,6 +67,44 @@ arc_alpha = dynamic_polarizability_from_components(arc_components)
 
 See `examples/alkali_polarizability.py` for an Rb/Cs plotting example.
 
+## Beam profiling
+
+The beam-profiling tool fits numeric-named TIFF images with 2D Gaussians, writes
+per-image fit CSVs, and fits the measured radii to Gaussian-beam propagation.
+Use numeric TIFF stems for the propagation coordinate, for example
+`-2.0.tif`, `0.0.tif`, and `2.0.tif`.
+
+From the command line:
+
+```bash
+uv run dnamic-beam-profile PATH/TO/TIFF_FOLDER --centre-x 671 --centre-y 786
+```
+
+Useful options include `--output`, `--fit-half-size`, `--fit-stride`,
+`--pixel-size`, `--waist-unit`, `--distance-unit`, and `--robust`.
+
+From Python:
+
+```python
+from pathlib import Path
+
+from dnamic_toolkit.tools.beam_profile import (
+    BeamProfileSettings,
+    analyze_beam_profiles,
+)
+
+result = analyze_beam_profiles(
+    BeamProfileSettings(
+        folder=Path("PATH/TO/TIFF_FOLDER"),
+        centre_x=671,
+        centre_y=786,
+    )
+)
+print(result.results_csv)
+```
+
+See `examples/beam_profile.py` for a copy-editable script.
+
 ## Plotting styles and colours
 
 Use the bundled Matplotlib styles directly:

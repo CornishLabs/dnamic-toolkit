@@ -13,7 +13,11 @@ dependencies = [
     "matplotlib>=3.10.7",
     "numpy>=2.3.5",
     "scipy<1.17",
+    "tifffile>=2026.1.1",
 ]
+
+[project.scripts]
+dnamic-beam-profile = "dnamic_toolkit.tools.beam_profile:main"
 
 [build-system]
 requires = ["uv_build>=0.9.11,<0.10.0"]
