@@ -48,7 +48,7 @@ import tifffile
 from scipy.optimize import least_squares
 
 
-SCRIPT_VERSION = "2026.07.28-centres-propagation-v3"
+SCRIPT_VERSION = "2026.09.01-propagation-uncertainty-v4"
 
 
 # Parameter order used by the fit:
@@ -499,10 +499,12 @@ def fit_image(
         if result.jac.size > 0:
             try:
                 # The residuals are normalized by the border-noise estimate.
-                # Scaling by chi^2/dof also absorbs modest model mismatch.
+                # Treat that as an absolute lower bound on the per-pixel noise,
+                # while allowing excess residual scatter/model mismatch to
+                # inflate the parameter covariance.
                 jtj_inv = np.linalg.pinv(result.jac.T @ result.jac)
                 reduced_chi2 = float(np.sum(result.fun**2) / dof)
-                covariance = jtj_inv * reduced_chi2
+                covariance = jtj_inv * max(reduced_chi2, 1.0)
                 diagonal = np.diag(covariance)
                 errors = np.sqrt(np.where(diagonal >= 0, diagonal, np.nan))
             except np.linalg.LinAlgError:
@@ -1030,6 +1032,41 @@ def gaussian_beam_radius(
     return w0 * np.sqrt(1.0 + ((z - z0) / z_rayleigh) ** 2)
 
 
+def gaussian_beam_radius_standard_error(
+    distance: np.ndarray | float,
+    w0: float,
+    z0: float,
+    z_rayleigh: float,
+    covariance: np.ndarray,
+) -> np.ndarray:
+    """Propagate parameter covariance to the fitted 1/e² radius.
+
+    This uses the first-order covariance propagation ``J C J.T``, where ``J``
+    is the gradient of :func:`gaussian_beam_radius` with respect to
+    ``(w0, z0, z_rayleigh)``.
+    """
+
+    z = np.asarray(distance, dtype=float)
+    covariance_array = np.asarray(covariance, dtype=float)
+    if covariance_array.shape != (3, 3) or not np.all(np.isfinite(covariance_array)):
+        return np.full_like(z, np.nan, dtype=float)
+    if not np.all(np.isfinite([w0, z0, z_rayleigh])) or z_rayleigh <= 0:
+        return np.full_like(z, np.nan, dtype=float)
+
+    scaled_distance = (z - z0) / z_rayleigh
+    root = np.sqrt(1.0 + scaled_distance**2)
+    jacobian = np.stack(
+        (
+            root,
+            -w0 * scaled_distance / (z_rayleigh * root),
+            -w0 * scaled_distance**2 / (z_rayleigh * root),
+        ),
+        axis=-1,
+    )
+    variance = np.einsum("...i,ij,...j->...", jacobian, covariance_array, jacobian)
+    return np.sqrt(np.maximum(variance, 0.0))
+
+
 def failed_propagation_fit(message: str, n_points: int) -> PropagationFit:
     return PropagationFit(
         success=False,
@@ -1168,9 +1205,14 @@ def fit_gaussian_beam_propagation(
     if result.jac.size > 0:
         try:
             covariance_transformed = np.linalg.pinv(result.jac.T @ result.jac)
-            # For measured errors, this factor allows for modest model mismatch.
-            # For unweighted data, it supplies the residual-variance scale.
-            covariance_transformed *= reduced_chi2
+            # The per-image radius errors are absolute 1-sigma uncertainties,
+            # so their magnitude is already present in the normalized Jacobian.
+            # Do not shrink below that scale, but inflate for excess scatter.
+            # The unweighted fallback always needs the residual-variance scale.
+            covariance_scale = (
+                max(reduced_chi2, 1.0) if uses_measured_errors else reduced_chi2
+            )
+            covariance_transformed *= covariance_scale
             transform = np.diag([w0, 1.0, z_rayleigh])
             covariance_physical = (
                 transform @ covariance_transformed @ transform.T
@@ -1311,7 +1353,7 @@ def plot_waists(
         marker="o",
         linestyle="none",
         capsize=3,
-        label=f"{label_1} data",
+        label=f"{label_1} data (1σ image-fit error)",
     )
     ax.errorbar(
         distance,
@@ -1320,37 +1362,69 @@ def plot_waists(
         marker="o",
         linestyle="none",
         capsize=3,
-        label=f"{label_2} data",
+        label=f"{label_2} data (1σ image-fit error)",
     )
 
     z_dense = np.linspace(float(np.min(distance)), float(np.max(distance)), 800)
     if propagation_1.success:
-        ax.plot(
+        fitted_radius_1 = gaussian_beam_radius(
             z_dense,
-            gaussian_beam_radius(
-                z_dense,
-                propagation_1.w0,
-                propagation_1.z0,
-                propagation_1.z_rayleigh,
-            ),
+            propagation_1.w0,
+            propagation_1.z0,
+            propagation_1.z_rayleigh,
+        )
+        fitted_error_1 = gaussian_beam_radius_standard_error(
+            z_dense,
+            propagation_1.w0,
+            propagation_1.z0,
+            propagation_1.z_rayleigh,
+            propagation_1.covariance,
+        )
+        (line_1,) = ax.plot(
+            z_dense,
+            fitted_radius_1,
             linewidth=1.7,
             label=propagation_fit_label(
                 label_1, propagation_1, waist_unit, distance_unit
             ),
         )
-    if propagation_2.success:
-        ax.plot(
+        ax.fill_between(
             z_dense,
-            gaussian_beam_radius(
-                z_dense,
-                propagation_2.w0,
-                propagation_2.z0,
-                propagation_2.z_rayleigh,
-            ),
+            fitted_radius_1 - fitted_error_1,
+            fitted_radius_1 + fitted_error_1,
+            color=line_1.get_color(),
+            alpha=0.18,
+            linewidth=0,
+        )
+    if propagation_2.success:
+        fitted_radius_2 = gaussian_beam_radius(
+            z_dense,
+            propagation_2.w0,
+            propagation_2.z0,
+            propagation_2.z_rayleigh,
+        )
+        fitted_error_2 = gaussian_beam_radius_standard_error(
+            z_dense,
+            propagation_2.w0,
+            propagation_2.z0,
+            propagation_2.z_rayleigh,
+            propagation_2.covariance,
+        )
+        (line_2,) = ax.plot(
+            z_dense,
+            fitted_radius_2,
             linewidth=1.7,
             label=propagation_fit_label(
                 label_2, propagation_2, waist_unit, distance_unit
             ),
+        )
+        ax.fill_between(
+            z_dense,
+            fitted_radius_2 - fitted_error_2,
+            fitted_radius_2 + fitted_error_2,
+            color=line_2.get_color(),
+            alpha=0.18,
+            linewidth=0,
         )
 
     ax.set_xlabel(f"Distance from TIFF filename [{distance_unit}]")
@@ -1359,6 +1433,7 @@ def plot_waists(
         title
         + "\n"
         + r"Gaussian-beam fit: $w(z)=w_0\sqrt{1+((z-z_0)/z_R)^2}$"
+        + "\nError bars are 1σ image-fit errors; shading is the propagated 1σ fit error"
     )
     # ax.grid(True, alpha=0.3)
     ax.legend(fontsize=8)
@@ -1418,8 +1493,9 @@ def build_parser() -> argparse.ArgumentParser:
         type=float,
         default=defaults.pixel_size,
         help=(
-            "Physical size represented by one camera pixel. Default 1, so "
-            "reported waists are in pixels."
+            "Object-plane size represented by one TIFF array pixel, including "
+            "camera binning and imaging magnification. Default 1, so reported "
+            "waists are in pixels."
         ),
     )
     parser.add_argument(
