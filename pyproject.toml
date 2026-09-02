@@ -1,23 +1,44 @@
 [project]
 name = "dnamic-toolkit"
 version = "0.1.0"
-description = "Add your description here"
+description = "Reusable AMO physics, statistics, plotting, and analysis tools."
 authors = [
     { name = "tomhepz", email = "9285131+tomhepz@users.noreply.github.com" }
 ]
 requires-python = ">=3.13"
 dependencies = [
+    "numpy>=2.3.5",
+    "scipy<1.17",
+]
+
+[project.optional-dependencies]
+plotting = [
+    "matplotlib>=3.10.7",
+]
+beam-profile = [
+    "matplotlib>=3.10.7",
+    "tifffile>=2026.1.1",
+]
+alkali = [
+    "arc-alkali-rydberg-calculator>=3.10.2",
+]
+molecules = [
+    "diatomic-py>=2.1.0",
+    "matplotlib>=3.10.7",
+]
+hdf5 = [
+    "h5py>=3.15.1",
+]
+all = [
     "arc-alkali-rydberg-calculator>=3.10.2",
     "diatomic-py>=2.1.0",
     "h5py>=3.15.1",
     "matplotlib>=3.10.7",
-    "numpy>=2.3.5",
-    "scipy<1.17",
     "tifffile>=2026.1.1",
 ]
 
 [project.scripts]
-dnamic-beam-profile = "dnamic_toolkit.tools.beam_profile:main"
+dnamic-beam-profile = "dnamic_toolkit.tools._entry_points:beam_profile"
 
 [build-system]
 requires = ["uv_build>=0.9.11,<0.10.0"]
@@ -25,6 +46,11 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
-    "pyqt6>=6.10.1",
+    "pyqt6>=6.11.0",
+]
+test = [
     "pytest>=9.0.2",
 ]
+
+[tool.uv]
+default-groups = ["test"]

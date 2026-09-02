@@ -1,6 +1,17 @@
 # dnamic-toolkit
 Contains common helper functions, physics calculations, for use in DNAMIC (c)ontrolled labs.
 
+The default installation contains the generic NumPy/SciPy physics and statistics
+helpers. Install only the capability extras needed by a particular workflow:
+
+```bash
+uv sync --extra plotting       # Matplotlib display helpers and styles
+uv sync --extra alkali         # ARC alkali/Rydberg calculations
+uv sync --extra molecules      # diatomic-py spectrum tools and plotting
+uv sync --extra hdf5           # HDF5 result helpers
+uv sync --extra beam-profile   # TIFF beam-profile command and plotting
+```
+
 ## Gaussian tweezer properties
 
 The lightweight analytical model can turn per-tweezer optical power and measured
@@ -36,6 +47,9 @@ and can consequently give somewhat lower frequencies.
 
 ## Alkali polarizabilities
 
+This module requires the `alkali` extra. The plotting example also requires
+`plotting`.
+
 Rb/Cs dynamic polarizabilities can be calculated with ARC, or loaded from portal
 CSV exports that contain `alpha_0`, `alpha_2`, and their uncertainties:
 
@@ -69,10 +83,21 @@ See `examples/alkali_polarizability.py` for an Rb/Cs plotting example.
 
 ## Beam profiling
 
+Install the `beam-profile` extra before using the command or Python module.
+
 The beam-profiling tool fits numeric-named TIFF images with 2D Gaussians, writes
 per-image fit CSVs, and fits the measured radii to Gaussian-beam propagation.
 Use numeric TIFF stems for the propagation coordinate, for example
 `-2.0.tif`, `0.0.tif`, and `2.0.tif`.
+
+The radius plots show the per-image 1σ fit errors. Those errors are used as
+absolute uncertainties in the Gaussian-beam propagation fit, and the shaded
+region around each propagation curve is its propagated 1σ uncertainty.
+
+`--pixel-size` must be the object-plane size represented by one array pixel in
+the TIFF, in the unit named by `--waist-unit`. Include camera binning and imaging
+magnification; for example, use `sensor_pixel_pitch * binning / magnification`.
+The numeric TIFF stems must already be expressed in `--distance-unit`.
 
 From the command line:
 
@@ -106,6 +131,9 @@ print(result.results_csv)
 See `examples/beam_profile.py` for a copy-editable script.
 
 ## Plotting styles and colours
+
+The styles and colour definitions are packaged in the base installation. The
+Matplotlib helpers require the `plotting` extra.
 
 Use the bundled Matplotlib styles directly:
 
@@ -162,7 +190,7 @@ For having an install, and being able to edit it, see below.
 ```bash
 git clone https://github.com/CornishLabs/dnamic-toolkit.git
 cd dnamic-toolkit
-uv sync # This updates the venv associated with this folder
+uv sync --all-extras # Install every capability for development and tests
 ```
 
 This creates/updates the project’s `.venv` and installs the project in editable mode in this project venv for development.
@@ -170,7 +198,7 @@ This creates/updates the project’s `.venv` and installs the project in editabl
 ### Run the tests
 
 ```bash
-uv run pytest
+uv run --all-extras pytest
 ```
 
 `uv run` executes commands inside the project environment (it syncs before if necessary).
@@ -186,7 +214,7 @@ uv run python -c "import dnamic_toolkit; print('import ok')"
 ### Run an example
 
 ```bash
-uv run python examples/<example_file>.py
+uv run --all-extras python examples/<example_file>.py
 ```
 
 (See the `examples/` folder for runnable scripts.)
