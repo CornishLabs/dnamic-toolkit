@@ -130,6 +130,25 @@ print(result.results_csv)
 
 See `examples/beam_profile.py` for a copy-editable script.
 
+## Thorlabs camera viewer
+
+The optional camera viewer displays a locally connected Thorlabs scientific
+camera and provides exposure, gain and colour-map controls. Its draggable ROI
+shows raw count statistics and a rolling graph of the summed counts. Image
+markers, draggable line profiles, saturation highlighting, cursor values and
+camera diagnostics are kept visible alongside the unobstructed camera image.
+
+Install `dnamic-toolkit[camera-viewer]` and the proprietary
+`thorlabs-tsi-sdk`, then run:
+
+```bash
+dnamic-thorlabs-camera
+```
+
+The analysis environment in `dnamic-lab` already supplies both. Pass
+`--camera-id SERIAL` to select a particular camera; otherwise the first camera
+found is opened.
+
 ## Plotting styles and colours
 
 The styles and colour definitions are packaged in the base installation. The
