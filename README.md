@@ -86,7 +86,7 @@ See `examples/alkali_polarizability.py` for an Rb/Cs plotting example.
 Install the `beam-profile` extra before using the command or Python module.
 
 The beam-profiling tool fits numeric-named TIFF images with 2D Gaussians, writes
-per-image fit CSVs, and fits the measured radii to Gaussian-beam propagation.
+one CSV containing all per-image fits, and fits the measured radii to Gaussian-beam propagation.
 Use numeric TIFF stems for the propagation coordinate, for example
 `-2.0.tif`, `0.0.tif`, and `2.0.tif`.
 
@@ -102,13 +102,29 @@ The numeric TIFF stems must already be expressed in `--distance-unit`.
 From the command line:
 
 ```bash
-uv run dnamic-beam-profile PATH/TO/TIFF_FOLDER --centre-x 671 --centre-y 786
+uv run dnamic-beam-profile "/srv/shared-drive-share/vfuser01-labs/Tweezer/Experimental Results/2026/October/08/images" --centre-x 670 --centre-y 600 --pixel-size 3.45 --waist-unit um --distance-unit mm --fit-half-size 500
 ```
+
+| Argument | Meaning |
+| --- | --- |
+| Quoted folder path | Folder containing the numeric-named TIFF images. Quotes preserve spaces in the path. |
+| `--centre-x 670` | Initial beam centre estimate: image column, in pixels. |
+| `--centre-y 600` | Initial beam centre estimate: image row, in pixels. |
+| `--pixel-size 3.45` | Each saved TIFF pixel represents 3.45 µm at the beam plane. |
+| `--waist-unit um` | Label the converted radii in µm; this label alone does not convert values. |
+| `--distance-unit mm` | Interpret the numeric filename stems as distances in mm; `100.tif` means 100 mm. No numeric conversion is applied. |
+| `--fit-half-size 500` | Fit within ±500 pixels of the centre in each direction (nominally 1001 × 1001 pixels, clipped at image edges). Used for both fitting passes. |
+
+Choose a crop that includes the beam and enough surrounding background in every
+image. The default half-size is 180 pixels. If the beam moves outside the initial
+crop, the first-pass centre can become pinned to a crop boundary. The second pass
+recentres on the fitted centre, but cannot reliably repair a bad first pass.
+Increase the crop and check that the fitted radii are stable.
 
 Useful options include `--output`, `--fit-half-size`, `--fit-stride`,
 `--pixel-size`, `--waist-unit`, `--distance-unit`, and `--robust`.
 
-From Python:
+The equivalent Python (script/notebook) submission is:
 
 ```python
 from pathlib import Path
@@ -120,15 +136,49 @@ from dnamic_toolkit.tools.beam_profile import (
 
 result = analyze_beam_profiles(
     BeamProfileSettings(
-        folder=Path("PATH/TO/TIFF_FOLDER"),
-        centre_x=671,
-        centre_y=786,
+        folder=Path(
+            "/srv/shared-drive-share/vfuser01-labs/Tweezer/"
+            "Experimental Results/2026/October/08/images"
+        ),  # Input TIFF folder; numeric filenames give the propagation distances.
+        centre_x=670,       # Initial centre column in pixels.
+        centre_y=600,       # Initial centre row in pixels.
+        pixel_size=3.45,    # Beam-plane µm per saved TIFF pixel.
+        waist_unit="um",   # Label for radii after pixel-size conversion.
+        distance_unit="mm",  # Unit of numeric filename stems; no conversion.
+        fit_half_size=500,  # Crop half-width in pixels, used in both passes.
     )
 )
 print(result.results_csv)
 ```
 
 See `examples/beam_profile.py` for a copy-editable script.
+
+### Fitting passes and saved outputs
+
+The first pass fits each image twice around the supplied centre: an x/y-aligned
+Gaussian (`theta = 0`) and a free-angle elliptical Gaussian. The free-angle fits
+determine one common orthogonal axis set for the whole series. The second pass
+recentres each crop on its free-angle fitted centre (falling back to the aligned
+centre if needed), then refits with that common angle fixed. All reported widths
+are **1/e² intensity radii**, not diameters.
+
+Outputs go to `FOLDER/beam_profile_results` unless `--output` (Python: `output`)
+specifies another directory. Reusing an output directory overwrites matching
+output files.
+
+| Output | Fits used |
+| --- | --- |
+| `per_image/*.png` | **Second-pass common-axis fits** over the raw images and centre-row/column intensity slices. These are not first-pass diagnostics; the displayed region can also be larger than the fitting crop. |
+| `waists_principal_axes.png` | Second-pass common-axis radii versus distance, with independent propagation fits for the two axes. |
+| `waists_xy.png` | **First-pass x/y-aligned fits**, with independent propagation fits for x and y. These are not repeated in the second pass and are not projections of the common-axis fits. |
+| `beam_centres.png` | Second-pass common-axis fitted centres versus distance, in camera pixels. |
+| `beam_fit_results.csv` | All three image fits: `aligned_*` and `free_*` from the first pass, and `common_*` from the second pass, including parameters, uncertainties, fit quality and crop bounds. |
+| `beam_propagation_fits.csv` | Propagation parameters for both `x_y_aligned` and `common_principal_axes` groups. |
+
+There are no separate first-pass per-image plots. Check those fits through the
+`aligned_*` and `free_*` CSV columns. A successful optimizer status alone does not
+establish a reliable waist: inspect the propagation fit quality, uncertainties,
+and whether the measured distance range constrains the minimum.
 
 ## Thorlabs camera viewer
 
